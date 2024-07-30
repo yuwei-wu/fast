@@ -58,7 +58,7 @@ void KinoReplanFSM::init(ros::NodeHandle& nh) {
 
   /* callback */
   exec_timer_   = nh.createTimer(ros::Duration(0.01), &KinoReplanFSM::execFSMCallback, this);
-  safety_timer_ = nh.createTimer(ros::Duration(0.05), &KinoReplanFSM::checkCollisionCallback, this);
+  safety_timer_ = nh.createTimer(ros::Duration(0.02), &KinoReplanFSM::checkCollisionCallback, this);
 
   waypoint_sub_ =
       nh.subscribe("waypoints", 1, &KinoReplanFSM::waypointCallback, this);
@@ -67,7 +67,44 @@ void KinoReplanFSM::init(ros::NodeHandle& nh) {
 
   traj_goal_pub_ = nh.advertise<kr_tracker_msgs::PolyTrackerActionGoal>("tracker_cmd", 10);
 
+  //dodge trigger
+  nh.param("forward_dist", forward_dist_, 2.0);
+  std::cout << "forward_dist_ is " << forward_dist_ << std::endl;
+
+
+
+  trigger_sub_ = nh.subscribe("trigger", 1, &KinoReplanFSM::triggerCallback, this);
+
+  Eigen::Vector3d map_origin, map_size;
+  planner_manager_->edt_environment_->getMapRegion(map_origin, map_size);
+  max_forward_dist_ = map_origin(0) + map_size(0) - 1.0;
 }
+
+void KinoReplanFSM::triggerCallback(const std_msgs::EmptyConstPtr &msg)
+{
+  if (abs(odom_pos_(0) - max_forward_dist_) < 1.0)
+  {
+    return;
+  }
+
+
+  trigger_ = true;
+  have_target_ = true;
+  waypoint_num_ = 1;
+  std::cout << "triggered new goal" << std::endl;
+
+  //set a waypoint in front of the drone
+  waypoints_[0][0] = std::min(odom_pos_(0) + forward_dist_, max_forward_dist_);
+  waypoints_[0][1] = odom_pos_(1);
+  waypoints_[0][2] = 1.5;
+
+  
+
+  current_wp_ = 0;
+  setGoal();
+
+}
+
 
 void KinoReplanFSM::waypointCallback(const nav_msgs::PathConstPtr& msg) {
 
@@ -147,7 +184,7 @@ void KinoReplanFSM::changeFSMExecState(FSM_EXEC_STATE new_state, string pos_call
 void KinoReplanFSM::printFSMExecState() {
   string state_str[5] = { "INIT", "WAIT_TARGET", "GEN_NEW_TRAJ", "REPLAN_TRAJ", "EXEC_TRAJ" };
 
-  cout << "[FSM]: state: " + state_str[int(exec_state_)] << endl;
+  cout << "[Fast Planner FSM]: state: " + state_str[int(exec_state_)] << endl;
 }
 
 void KinoReplanFSM::execFSMCallback(const ros::TimerEvent& e) {
@@ -224,8 +261,13 @@ void KinoReplanFSM::execFSMCallback(const ros::TimerEvent& e) {
       } else if ((info->start_pos_ - pos).norm() < replan_thresh_) {
         //cout << "near start" << endl;
         return;
-
-      } else {
+      }
+      else if ((odom_pos_ - pos).norm() > 2.0)
+      {
+        cout << "[FSM] The agent does not follow the trajectory, stop! " << endl;
+        changeFSMExecState(GEN_NEW_TRAJ, "FSM");
+      } 
+      else {
         changeFSMExecState(REPLAN_TRAJ, "FSM");
       }
       break;

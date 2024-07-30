@@ -1,0 +1,42 @@
+<launch>
+  <arg name="mav_name" default="kingfisher"/>
+  <arg name="mav_id" default="1"/>
+  <arg name="mav_type" default="hummingbird"/>
+  <arg name="world_frame_id" default="world"/>
+  <arg name="sim" default="1"/>
+  <arg name="vicon" default="1"/>
+  <arg name="vicon_fps" default="100"/>
+  <arg name="slow_baud_rate" default="true"/>
+  <arg name="mass" default="0.752"/>
+  <arg name="nodelet_manager_name" default="nodelet_manager_control"/>
+
+  <arg name="odom_topic" default="/$(arg mav_name)/dodgeros_pilot/groundtruth/odometry"/>
+
+
+  <!-- size of map, change the size in x, y, z according to your application -->
+
+  <!-- Control stuff -->
+  <include file="$(find kr_mav_launch)/launch/example_control.launch">
+    <arg name="nodelet_manager_name" value="$(arg nodelet_manager_name)"/>
+    <arg name="mass" value="$(arg mass)"/>
+    <arg name="mav_name" value="$(arg mav_name)"/>
+    <arg name="mav_type" value="$(arg mav_type)"/>
+    <arg name="odom_topic" value="$(arg odom_topic)"/>
+
+  </include>
+
+  <group ns="$(arg mav_name)">
+
+    <include file="$(find plan_manage)/launch/kino_replan.launch">
+      <arg name="mav_name" value="$(arg mav_name)"/>
+      <arg name="world_frame_id" value="$(arg world_frame_id)"/>
+      <arg name="mav_id" value="$(arg mav_id)"/>
+      <arg name="odom_topic" value="$(arg odom_topic)"/>
+    </include>
+
+  
+  </group>
+
+
+
+</launch>

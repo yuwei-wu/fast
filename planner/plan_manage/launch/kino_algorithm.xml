@@ -4,12 +4,17 @@
   <arg name="map_size_y_"/>
   <arg name="map_size_z_"/>
 
+  <arg name="map_origin_x"/>
+  <arg name="map_origin_y"/>
+  <arg name="map_origin_z"/>
+
+  <!-- topics -->
   <arg name="odom_topic"/>
   <arg name="waypoints_topic"/>
-
   <arg name="camera_pose_topic"/>
   <arg name="depth_topic"/>
   <arg name="cloud_topic"/>
+  <arg name="trigger_topic"/>
 
   <arg name="cx"/>
   <arg name="cy"/>
@@ -36,13 +41,15 @@
   <arg name="srv_name"/>
 
   <!-- main node -->
-  <node pkg="plan_manage" name="planner_node" type="planner_node" output="screen">
+  <node pkg="plan_manage" name="fast_planner_node" type="fast_planner_node" output="screen">
     <param name="world_frame_id" value ="$(arg world_frame_id)"/>
 
     <remap from="~odom" to="$(arg odom_topic)"/>
     <remap from="~waypoints"  to="$(arg waypoints_topic)"/>
     <remap from="~tracker_cmd"  to="$(arg tracker_topic)"/>
     <param name="srv_name"     value="$(arg srv_name)"/>
+    <remap from="~trigger"      to="$(arg trigger_topic)"/>
+    <param name="forward_dist"  value="80.0" type="double"/>
 
 
     <!-- replanning method -->
@@ -71,14 +78,18 @@
     <remap from ="~sdf_map_pose"  to ="$(arg camera_pose_topic)"/> 
     <remap from ="~sdf_map_depth" to ="$(arg depth_topic)"/>
 
+    <param name="sdf_map/map_origin_x" value="$(arg map_origin_x)"/>
+    <param name="sdf_map/map_origin_y" value="$(arg map_origin_y)"/>
+    <param name="sdf_map/map_origin_z" value="$(arg map_origin_z)"/>
+
     <param name="sdf_map/resolution"      value="0.1" /> 
     <param name="sdf_map/map_size_x"   value="$(arg map_size_x_)" /> 
     <param name="sdf_map/map_size_y"   value="$(arg map_size_y_)" /> 
     <param name="sdf_map/map_size_z"   value="$(arg map_size_z_)" /> 
-    <param name="sdf_map/local_update_range_x"  value="5.5" /> 
-    <param name="sdf_map/local_update_range_y"  value="5.5" /> 
-    <param name="sdf_map/local_update_range_z"  value="4.5" /> 
-    <param name="sdf_map/obstacles_inflation"     value="0.099" /> 
+    <param name="sdf_map/local_update_range_x"  value="10" /> 
+    <param name="sdf_map/local_update_range_y"  value="10" /> 
+    <param name="sdf_map/local_update_range_z"  value="6" /> 
+    <param name="sdf_map/obstacles_inflation"     value="0.12" /> 
     <param name="sdf_map/local_bound_inflate"    value="0.0"/>
     <param name="sdf_map/local_map_margin" value="50"/>
     <param name="sdf_map/ground_height"        value="-1.0"/>
@@ -88,28 +99,28 @@
     <param name="sdf_map/fx" value="$(arg fx)"/>
     <param name="sdf_map/fy" value="$(arg fy)"/>
     <!-- depth filter -->
-    <param name="sdf_map/use_depth_filter" value="true"/>
+    <param name="sdf_map/use_depth_filter" value="false"/>
     <param name="sdf_map/depth_filter_tolerance" value="0.15"/>
     <param name="sdf_map/depth_filter_maxdist"   value="5.0"/>
     <param name="sdf_map/depth_filter_mindist"   value="0.2"/>
     <param name="sdf_map/depth_filter_margin"    value="2"/>
-    <param name="sdf_map/k_depth_scaling_factor" value="1000.0"/>
-    <param name="sdf_map/skip_pixel" value="2"/>
+    <param name="sdf_map/k_depth_scaling_factor" value="10.0"/>
+    <param name="sdf_map/skip_pixel" value="1"/>
     <!-- local fusion -->
     <param name="sdf_map/p_hit"  value="0.65"/>
     <param name="sdf_map/p_miss" value="0.35"/>
     <param name="sdf_map/p_min"  value="0.12"/>
     <param name="sdf_map/p_max"  value="0.90"/>
-    <param name="sdf_map/p_occ"  value="0.80"/>
+    <param name="sdf_map/p_occ"  value="0.70"/>
     <param name="sdf_map/min_ray_length" value="0.5"/>
-    <param name="sdf_map/max_ray_length" value="4.5"/>
+    <param name="sdf_map/max_ray_length" value="10.0"/>
 
     <param name="sdf_map/esdf_slice_height" value="0.3"/>
-    <param name="sdf_map/visualization_truncate_height"   value="2.49"/>
-    <param name="sdf_map/virtual_ceil_height"   value="2.5"/>
+    <param name="sdf_map/visualization_truncate_height"   value="99"/>
+    <param name="sdf_map/virtual_ceil_height"   value="100"/>
     <param name="sdf_map/show_occ_time"  value="false"/>
     <param name="sdf_map/show_esdf_time" value="false"/>
-    <param name="sdf_map/pose_type"     value="1"/>  
+    <param name="sdf_map/pose_type"     value="2"/>  
     <param name="sdf_map/frame_id"      value="$(arg world_frame_id)"/>
 
   <!-- planner manager -->
@@ -132,7 +143,7 @@
     <param name="search/max_vel" value="$(arg max_vel)" type="double"/>
     <param name="search/max_acc" value="$(arg max_acc)" type="double"/>
     <param name="search/w_time" value="10.0" type="double"/>
-    <param name="search/horizon" value="7.0" type="double"/>
+    <param name="search/horizon" value="10.0" type="double"/>
     <param name="search/lambda_heu" value="5.0" type="double"/>
     <param name="search/resolution_astar" value="0.1" type="double"/>
     <param name="search/time_resolution" value="0.8" type="double"/>

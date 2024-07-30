@@ -208,8 +208,8 @@ public:
       mat_jerk.setZero();
       for (double i = 3; i < order; i += 1)
         for (double j = 3; j < order; j += 1) {
-          mat_jerk(i, j) =
-              i * (i - 1) * (i - 2) * j * (j - 1) * (j - 2) * pow(ts, i + j - 5) / (i + j - 5);
+          mat_jerk((int)i, (int)j) =
+          i * (i - 1) * (i - 2) * j * (j - 1) * (j - 2) * pow(ts, i + j - 5) / (i + j - 5);
         }
 
       jerk += (cxv.transpose() * mat_jerk * cxv)(0, 0);

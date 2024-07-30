@@ -177,6 +177,9 @@ bool FastPlannerManager::kinodynamicReplan(Eigen::Vector3d start_pt, Eigen::Vect
 
   t_search = (ros::Time::now() - t1).toSec();
 
+  //print the last point of the kino path
+  std::cout << "last point of the kino path: " << plan_data_.kino_path_.back().transpose() << std::endl;
+
   // parameterize the path to bspline
 
   double                  ts = pp_.ctrl_pt_dist / pp_.max_vel_;

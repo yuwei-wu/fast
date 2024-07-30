@@ -100,7 +100,7 @@ private:
   /* ROS utils */
   ros::NodeHandle node_;
   ros::Timer exec_timer_, safety_timer_, vis_timer_, test_something_timer_;
-  ros::Subscriber waypoint_sub_, odom_sub_;
+  ros::Subscriber waypoint_sub_, odom_sub_, trigger_sub_;
   ros::Publisher traj_goal_pub_;
   std::string srv_name_;
 
@@ -110,6 +110,11 @@ private:
                                        // optimization; 1: new, 2: replan
   void changeFSMExecState(FSM_EXEC_STATE new_state, string pos_call);
   void printFSMExecState();
+
+  //@yuwei
+  void triggerCallback(const std_msgs::EmptyConstPtr &msg);
+  double forward_dist_, max_forward_dist_;
+
 
   void setGoal();
   /* ROS functions */
