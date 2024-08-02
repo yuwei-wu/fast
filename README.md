@@ -8,13 +8,13 @@ Independent planning module, code revised from fast planner: https://github.com/
 1. clone the repo and complie it:
 
 ```console
-$ git clone -b kr git@github.com:yuwei-wu/Fast-Planner.git
+$ git clone -b dodge git@github.com:yuwei-wu/Fast-Planner.git
 $ wstool init && wstool merge Fast-Planner/fast.rosinstall && wstool update
 $ cd ..
 $ catkin build
 ```
 
-2. run the code, you can directly copy the launch_bench.bash to the vitfly folder and run it
+2. run the code, you can directly copy the launch_bench.bash from https://github.com/yuwei-wu/DoubleDescription to the vitfly folder and run it
 in one terminal, run:
 ```
  bash launch_bench.bash 1 vision
