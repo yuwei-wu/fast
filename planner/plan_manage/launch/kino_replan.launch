@@ -37,7 +37,7 @@
 
     <arg name="odom_topic"      value="$(arg odom_topic)"/>
     <arg name="waypoints_topic" value="$(arg waypoints_topic)"/>
-    <arg name="trigger_topic" value="/$(arg mav_name)/start_bench"/>
+    <arg name="trigger_topic" value="/$(arg mav_name)/start_navigation/bench"/>
 
     <arg name="tracker_topic" value="/$(arg mav_name)/trackers_manager/poly_tracker/PolyTracker/goal"/>
     <arg name="srv_name"  value="/$(arg mav_name)/mav_services/poly_tracker"/>
